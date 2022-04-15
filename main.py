@@ -5,7 +5,7 @@ import lightbulb
 import re
 import os
 
-DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = lightbulb.BotApp(token=DISCORD_TOKEN, default_enabled_guilds=799471328078856212)
 
@@ -25,7 +25,7 @@ def get_quote():
     """Returns a random quote from quotes.txt and also splits it."""
     with open('quotes.txt') as quotes:
         random_quote = choice(quotes.read().splitlines())
-        quote_as_list = list(filter(None, re.split('[., \-!?:~/"]+', random_quote)))
+        quote_as_list = list(filter(None, re.split('[., \-!?:~/*"]+', random_quote)))
     return random_quote, quote_as_list
 
 
@@ -51,22 +51,15 @@ def get_word(quote):
 def censor_quote(quote, random_word):
     """Takes quote and word, then returns the quote with the word censored."""
     censored_word = "".join(['\_' for char in random_word])
-    replacement = {random_word: censored_word}
 
-    def replace(match):
-        return replacement[match.group(0)]
-
-    censored_quote = re.sub('|'.join(r'\b%s\b' % re.escape(s) for s in replacement), replace, quote)
+    censored_quote = re.sub(fr'\b{random_word}\b', censored_word, quote)
     return censored_quote
 
 
 def reformat_quote(quote, random_word):
-    replacement = {random_word: f"__**{random_word}**__"}
+    reformatted_word = f"__**{random_word}**__"
 
-    def replace(match):
-        return replacement[match.group(0)]
-
-    reformatted_quote = re.sub('|'.join(r'\b%s\b' % re.escape(s) for s in replacement), replace, quote)
+    reformatted_quote = re.sub(fr'\b{random_word}\b', reformatted_word, quote)
     return reformatted_quote
 
 
