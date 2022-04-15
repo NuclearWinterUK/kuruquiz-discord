@@ -14,4 +14,3 @@ idna==3.3
 multidict==6.0.2
 typing_extensions==4.1.1
 yarl==1.7.2
-DISCORD_TOKEN=OTYyNzk4OTgzNDQzNTI5Nzgy.YlMybQ.578iUvPPbESsP1utG-PEk0Getnc
