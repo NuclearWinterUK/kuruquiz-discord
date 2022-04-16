@@ -7,7 +7,7 @@ import os
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = lightbulb.BotApp(token=DISCORD_TOKEN, default_enabled_guilds=799471328078856212)
+bot = lightbulb.BotApp(token=DISCORD_TOKEN, default_enabled_guilds=(799471328078856212, 812565163664343080))
 
 
 @bot.listen(lightbulb.CommandErrorEvent)
@@ -30,11 +30,18 @@ def get_quote():
 
 
 @bot.command()
+@lightbulb.option("keyword", "Search for a keyword.", required=False, )
 @lightbulb.command("quote", "See a random Kuru Quote!")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def quote(message):
-    random_quote = get_quote()
-    await message.respond(random_quote[0])
+    with open('quotes.txt') as f:
+        if message.options.keyword:
+            quotes = f.readlines()
+            matching_lines = [quote for quote in quotes if message.options.keyword.lower() in quote.lower()]
+            await message.respond(choice(matching_lines))
+        else:
+            random_quote = choice(f.read().splitlines())
+            await message.respond(random_quote)
 
 
 @bot.command()
