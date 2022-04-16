@@ -30,6 +30,14 @@ def get_quote():
 
 
 @bot.command()
+@lightbulb.command("quote", "See a random Kuru Quote!")
+@lightbulb.implements(lightbulb.SlashCommand)
+async def quote(message):
+    random_quote = get_quote()
+    await message.respond(random_quote[0])
+
+
+@bot.command()
 @lightbulb.add_checks(lightbulb.has_roles(role1=799578859850563604))
 @lightbulb.option("quote", "The quote to add.")
 @lightbulb.command("addquote", "Adds a quote to the database.")
