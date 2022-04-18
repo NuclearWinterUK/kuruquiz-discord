@@ -58,7 +58,7 @@ async def addquote(message):
 def get_word(quote):
     """Takes quote and returns a random word."""
     random_word = choice(quote)
-    while random_word == "Kururin" or len(random_word) < 2:
+    while random_word == "Kururin" or len(random_word) < 3:
         random_word = choice(quote)
     return random_word
 
