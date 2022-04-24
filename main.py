@@ -25,7 +25,8 @@ def get_quote():
     """Returns a random quote from quotes.txt and also splits it."""
     with open('quotes.txt') as quotes:
         random_quote = choice(quotes.read().splitlines())
-        quote_as_list = list(filter(None, re.split('[., \-!?:;~/*"\[\]]+', random_quote)))
+        sub_quote_marks = re.sub(r"'([^A-Za-z])", r"\1", re.sub(r"([^A-Za-z])'", r"\1", random_quote))
+        quote_as_list = list(filter(None, re.split('[., \-!?:;~/*"\[\]]+', sub_quote_marks)))
     return random_quote, quote_as_list
 
 
