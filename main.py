@@ -38,8 +38,11 @@ async def quote(message):
     with open('quotes.txt') as f:
         if message.options.keyword:
             quotes = f.readlines()
-            matching_lines = [quote for quote in quotes if message.options.keyword.lower() in quote.lower()]
-            await message.respond(choice(matching_lines))
+            try:
+                matching_lines = [quote for quote in quotes if re.search(fr'\b{message.options.keyword.lower()}', quote.lower())]
+                await message.respond(choice(matching_lines))
+            except IndexError:
+                await message.respond(f"No result for keyword '{message.options.keyword}'")
         else:
             random_quote = choice(f.read().splitlines())
             await message.respond(random_quote)
