@@ -62,6 +62,33 @@ async def addquote(message):
         await message.respond(f"Added quote: {message.options.quote}")
 
 
+@bot.command()
+@lightbulb.add_checks(lightbulb.has_roles(role1=799578859850563604))
+@lightbulb.option("key", "The quote number or __**exact**__ quote to delete.")
+@lightbulb.command("delquote", "Deletes a quote form the database.")
+@lightbulb.implements(lightbulb.SlashCommand)
+async def delquote(message):
+    with open("quotes.txt", "r+") as f:
+        old_f = f.readlines()
+        new_f = []
+        f.seek(0)
+        if message.options.key.isnumeric():
+            for line in old_f:
+                if line != old_f[int(message.options.key) - 1]:
+                    new_f.append(line)
+                else:
+                    await message.respond(f"Deleted quote #{old_f.index(line) + 1}: {line}")
+        else:
+            for line in old_f:
+                if line.strip("\n") != message.options.key:
+                    new_f.append(line)
+                else:
+                    await message.respond(f"Deleted quote #{old_f.index(line) + 1}: {line}")
+        new_f[-1] = new_f[-1].rstrip('\r\n')
+        f.writelines(new_f)
+        f.truncate()
+
+
 def get_word(quote):
     """Takes quote and returns a random word."""
     random_word = choice(quote)
