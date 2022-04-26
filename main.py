@@ -31,21 +31,24 @@ def get_quote():
 
 
 @bot.command()
-@lightbulb.option("keyword", "Search for a keyword.", required=False, )
+@lightbulb.option("key", "Search for a keyword or quote number.", required=False, )
 @lightbulb.command("quote", "See a random Kuru Quote!")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def quote(message):
     with open('quotes.txt') as f:
-        if message.options.keyword:
-            quotes = f.readlines()
+        quotes = f.readlines()
+        if message.options.key is None:
+            random_quote = choice(quotes)
+            await message.respond(random_quote)
+        elif message.options.key.isnumeric():
+            await message.respond(quotes[int(message.options.key) - 1])
+        elif message.options.key:
             try:
-                matching_lines = [quote for quote in quotes if re.search(fr'\b{message.options.keyword.lower()}', quote.lower())]
+                matching_lines = [quote for quote in quotes if re.search(fr'\b{message.options.key.lower()}', quote.lower())]
                 await message.respond(choice(matching_lines))
             except IndexError:
-                await message.respond(f"No result for keyword '{message.options.keyword}'")
-        else:
-            random_quote = choice(f.read().splitlines())
-            await message.respond(random_quote)
+                await message.respond(f"No result for keyword '{message.options.key}'")
+
 
 
 @bot.command()
