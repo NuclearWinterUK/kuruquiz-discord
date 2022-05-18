@@ -167,4 +167,6 @@ async def begin(message):
                     game_over = True
                     await message.respond(f"You are out of lives, just like Kururin playing Yoshi's Island :(  Game over!")
 
-bot.run()
+if __name__ == '__flask__':
+    app.run()
+    bot.run()
