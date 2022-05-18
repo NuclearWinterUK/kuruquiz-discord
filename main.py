@@ -1,8 +1,4 @@
 from random import randint, choice
-from flask import Flask, jsonify, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql.expression import func, select
-import psycopg2
 import asyncio
 import hikari
 import lightbulb
@@ -10,18 +6,8 @@ import re
 import os
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
 
 bot = lightbulb.BotApp(token=DISCORD_TOKEN, default_enabled_guilds=(799471328078856212, 812565163664343080))
-
-
-class Quote(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    number = db.Column(db.Integer, unique=True, nullable=False)
-    quote = db.Column(db.String(500), unique=True, nullable=False)
 
 
 @bot.listen(lightbulb.CommandErrorEvent)
@@ -37,10 +23,11 @@ async def on_error(event: lightbulb.CommandErrorEvent) -> None:
 
 def get_quote():
     """Returns a random quote from quotes.txt and also splits it."""
-    random_quote = Quote.query.order_by(func.random()).first()
-    sub_quote_marks = re.sub(r"'([^A-Za-z])", r"\1", re.sub(r"([^A-Za-z])'", r"\1", random_quote.quote))
-    quote_as_list = list(filter(None, re.split('[., \-!?:;~/*"\[\]]+', sub_quote_marks)))
-    return random_quote.quote, quote_as_list
+    with open('quotes.txt') as quotes:
+        random_quote = choice(quotes.read().splitlines())
+        sub_quote_marks = re.sub(r"'([^A-Za-z])", r"\1", re.sub(r"([^A-Za-z])'", r"\1", random_quote))
+        quote_as_list = list(filter(None, re.split('[., \-!?:;~/*"\[\]]+', sub_quote_marks)))
+    return random_quote, quote_as_list
 
 
 @bot.command()
@@ -167,6 +154,4 @@ async def begin(message):
                     game_over = True
                     await message.respond(f"You are out of lives, just like Kururin playing Yoshi's Island :(  Game over!")
 
-if __name__ == '__flask__':
-    app.run()
-    bot.run()
+bot.run()
