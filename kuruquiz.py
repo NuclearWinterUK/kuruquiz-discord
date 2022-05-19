@@ -48,58 +48,58 @@ def get_quote():
 @lightbulb.command("quote", "See a random Kuru Quote!")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def quote(message):
-    with open('quotes.txt') as f:
-        quotes = f.readlines()
-        if message.options.key is None:
-            random_quote = choice(quotes)
-            await message.respond(random_quote)
-        elif message.options.key.isnumeric():
-            await message.respond(quotes[int(message.options.key) - 1])
-        elif message.options.key:
-            try:
-                matching_lines = [quote for quote in quotes if re.search(fr'\b{message.options.key.lower()}', quote.lower())]
-                await message.respond(choice(matching_lines))
-            except IndexError:
-                await message.respond(f"No result for keyword '{message.options.key}'")
+    if message.options.key is None:
+        random_quote = Quote.query.order_by(func.random()).first()
+        await message.respond(random_quote.quote)
+    elif message.options.key.isnumeric():
+        quote = Quote.query.filter_by(number=f"{message.options.key}").first()
+        await message.respond(quote.quote)
+    elif message.options.key:
+        try:
+            all_quotes = db.session.query(Quote).all()
+            matching_lines = [quote.quote for quote in all_quotes if re.search(fr'\b{message.options.key.lower()}', quote.quote.lower())]
+            await message.respond(choice(matching_lines))
+        except IndexError:
+            await message.respond(f"No result for keyword '{message.options.key}'")
 
 
 
-@bot.command()
-@lightbulb.add_checks(lightbulb.has_roles(role1=799578859850563604))
-@lightbulb.option("quote", "The quote to add.")
-@lightbulb.command("addquote", "Adds a quote to the database.")
-@lightbulb.implements(lightbulb.SlashCommand)
-async def addquote(message):
-    with open('quotes.txt', 'a') as quotes:
-        quotes.write(f"\n{message.options.quote}")
-        await message.respond(f"Added quote: {message.options.quote}")
+# @bot.command()
+# @lightbulb.add_checks(lightbulb.has_roles(role1=799578859850563604))
+# @lightbulb.option("quote", "The quote to add.")
+# @lightbulb.command("addquote", "Adds a quote to the database.")
+# @lightbulb.implements(lightbulb.SlashCommand)
+# async def addquote(message):
+#     with open('quotes.txt', 'a') as quotes:
+#         quotes.write(f"\n{message.options.quote}")
+#         await message.respond(f"Added quote: {message.options.quote}")
 
 
-@bot.command()
-@lightbulb.add_checks(lightbulb.has_roles(role1=799578859850563604))
-@lightbulb.option("key", "The quote number or __**exact**__ quote to delete.")
-@lightbulb.command("delquote", "Deletes a quote form the database.")
-@lightbulb.implements(lightbulb.SlashCommand)
-async def delquote(message):
-    with open("quotes.txt", "r+") as f:
-        old_f = f.readlines()
-        new_f = []
-        f.seek(0)
-        if message.options.key.isnumeric():
-            for line in old_f:
-                if line != old_f[int(message.options.key) - 1]:
-                    new_f.append(line)
-                else:
-                    await message.respond(f"Deleted quote #{old_f.index(line) + 1}: {line}")
-        else:
-            for line in old_f:
-                if line.strip("\n") != message.options.key:
-                    new_f.append(line)
-                else:
-                    await message.respond(f"Deleted quote #{old_f.index(line) + 1}: {line}")
-        new_f[-1] = new_f[-1].rstrip('\r\n')
-        f.writelines(new_f)
-        f.truncate()
+# @bot.command()
+# @lightbulb.add_checks(lightbulb.has_roles(role1=799578859850563604))
+# @lightbulb.option("key", "The quote number or __**exact**__ quote to delete.")
+# @lightbulb.command("delquote", "Deletes a quote form the database.")
+# @lightbulb.implements(lightbulb.SlashCommand)
+# async def delquote(message):
+#     with open("quotes.txt", "r+") as f:
+#         old_f = f.readlines()
+#         new_f = []
+#         f.seek(0)
+#         if message.options.key.isnumeric():
+#             for line in old_f:
+#                 if line != old_f[int(message.options.key) - 1]:
+#                     new_f.append(line)
+#                 else:
+#                     await message.respond(f"Deleted quote #{old_f.index(line) + 1}: {line}")
+#         else:
+#             for line in old_f:
+#                 if line.strip("\n") != message.options.key:
+#                     new_f.append(line)
+#                 else:
+#                     await message.respond(f"Deleted quote #{old_f.index(line) + 1}: {line}")
+#         new_f[-1] = new_f[-1].rstrip('\r\n')
+#         f.writelines(new_f)
+#         f.truncate()
 
 
 def get_word(quote):
